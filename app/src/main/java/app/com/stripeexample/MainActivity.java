@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -41,32 +42,55 @@ import cz.msebera.android.httpclient.entity.mime.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnSave, btnPay;
+    Button btnGenerateToken, btnPay, btnSaveCustomer, btnPayWithCustomer;
+    EditText txtFirstName, txtLastName, txtAddressLine1, txtAddressLine2, txtCity, txtState, txtZip, txtEmail;
     CardInputWidget mCardInputWidget;
     Card cardToSave;
     Context mContext;
     Stripe stripe;
     Token mToken;
+    String customerId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mCardInputWidget = (CardInputWidget) findViewById(R.id.card_input_widget);
-        btnSave = (Button) findViewById(R.id.btnSaveCard);
+        btnGenerateToken = (Button) findViewById(R.id.btnGenerateCard);
         btnPay = (Button) findViewById(R.id.btnPay);
         btnPay.setVisibility(View.GONE);
+        btnSaveCustomer = (Button) findViewById(R.id.btnSaveCustomer);
+        btnSaveCustomer.setVisibility(View.GONE);
+        btnPayWithCustomer = (Button) findViewById(R.id.btnPayWithCustomer);
+        btnPayWithCustomer.setVisibility(View.GONE);
+
+        txtFirstName = (EditText) findViewById(R.id.txtFirstName);
+        txtLastName = (EditText) findViewById(R.id.txtLastName);
+        txtAddressLine1 = (EditText) findViewById(R.id.txtAddressLine1);
+        txtAddressLine2 = (EditText) findViewById(R.id.txtAddressLine2);
+        txtCity = (EditText) findViewById(R.id.txtCity);
+        txtState = (EditText) findViewById(R.id.txtState);
+        txtZip = (EditText) findViewById(R.id.txtZip);
+        txtEmail = (EditText) findViewById(R.id.txtEmail);
+
         mContext = getApplicationContext();
+//        pk_test_ogTRhfvXntPKIP9BBHdqUGof
         stripe = new Stripe(mContext, "pk_test_ogTRhfvXntPKIP9BBHdqUGof");
 
-        btnSave.setOnClickListener(new View.OnClickListener() {
+        btnGenerateToken.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cardToSave = mCardInputWidget.getCard();
                 if (cardToSave == null) {
                     Toast.makeText(MainActivity.this,"Invalid Card Data",Toast.LENGTH_LONG).show();
                 }else {
-                    cardToSave.setName("Customer Name");
-                    cardToSave.setAddressZip("12345");
+                    cardToSave.setName(txtFirstName.getText().toString() + txtLastName.getText().toString());
+                    cardToSave.setAddressLine1(txtAddressLine1.getText().toString());
+                    cardToSave.setAddressLine2(txtAddressLine2.getText().toString());
+                    cardToSave.setAddressCity(txtCity.getText().toString());
+                    cardToSave.setAddressState(txtState.getText().toString());
+                    cardToSave.setAddressCountry("United States of America");
+                    cardToSave.setAddressZip(txtZip.getText().toString());
                     validateCard();
                 }
 
@@ -103,13 +127,77 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnPayWithCustomer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    AsyncHttpClient client = new AsyncHttpClient();
+                    RequestParams params  = new RequestParams();
+                    params.put("method", "charge");
+                    params.put("description", "Test");
+                    params.put("customerId", customerId);
+                    params.put("amount", "1500");
+                    client.post("http://54.70.113.238:7002/payWithCustomer/",params ,new AsyncHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+                            System.out.println(Arrays.toString(headers) + " :::: " + statusCode);
+                            Toast.makeText(MainActivity.this,"Payment Successful ",Toast.LENGTH_LONG).show();
+                            btnPay.setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+                            System.out.println(Arrays.toString(headers) + " :::: " + statusCode);
+                            Toast.makeText(MainActivity.this,"Payment Declined ",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        btnSaveCustomer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    AsyncHttpClient client = new AsyncHttpClient();
+                    RequestParams params  = new RequestParams();
+                    params.put("email", txtEmail.getText().toString());
+                    params.put("source", mToken.getId());
+                    client.post("http://54.70.113.238:7002/saveCustomer/",params ,new AsyncHttpResponseHandler() {
+                        @Override
+                        public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+                            Toast.makeText(MainActivity.this,"Payment Successful ",Toast.LENGTH_LONG).show();
+                            try {
+                                //TODO Store this customer ID
+                                customerId = new String(responseBody, "UTF-8");
+                                System.out.println(customerId);
+                                btnPayWithCustomer.setVisibility(View.VISIBLE);
+
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+                            System.out.println(Arrays.toString(headers) + " :::: " + statusCode);
+                            Toast.makeText(MainActivity.this,"Payment Declined ",Toast.LENGTH_LONG).show();
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
 
     }
 
     public void validateCard(){
         if (cardToSave.validateCard()) {
 
-            final boolean[] valid = {false};
             stripe.createToken(
                     cardToSave,
                     new TokenCallback() {
@@ -117,6 +205,7 @@ public class MainActivity extends AppCompatActivity {
                             System.out.println(token.getCard());
                             mToken = token;
                             btnPay.setVisibility(View.VISIBLE);
+                            btnSaveCustomer.setVisibility(View.VISIBLE);
                         }
                         public void onError(Exception error) {
                             // Show localized error message

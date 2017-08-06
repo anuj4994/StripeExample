@@ -4,9 +4,82 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email Address"
+        android:id="@+id/txtEmail" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:id="@+id/layoutName"
+        android:layout_below="@id/txtEmail">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="First Name"
+            android:id="@+id/txtFirstName"/>
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Last Name"
+            android:id="@+id/txtLastName"/>
+
+    </LinearLayout>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Address Line 1"
+        android:id="@+id/txtAddressLine1"
+        android:layout_below="@id/layoutName"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Address Line 2"
+        android:id="@+id/txtAddressLine2"
+        android:layout_below="@id/txtAddressLine1"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="City"
+        android:id="@+id/txtCity"
+        android:layout_below="@id/txtAddressLine2"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:id="@+id/layoutAddress"
+        android:layout_below="@id/txtCity">
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="State"
+            android:id="@+id/txtState"/>
+
+        <EditText
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Zip"
+            android:id="@+id/txtZip"/>
+
+    </LinearLayout>
 
     <com.stripe.android.view.CardInputWidget
         android:id="@+id/card_input_widget"
+        android:layout_below="@id/layoutAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         />
@@ -15,13 +88,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/card_input_widget"
-        android:text="Save card"
-        android:id="@+id/btnSaveCard"/>
+        android:text="Generate Token"
+        android:id="@+id/btnGenerateCard"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btnSaveCard"
+        android:layout_below="@id/btnGenerateCard"
+        android:text="Save Customer"
+        android:id="@+id/btnSaveCustomer"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnSaveCustomer"
         android:text="Pay"
         android:id="@+id/btnPay"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnPay"
+        android:text="Pay with Saved Customer"
+        android:id="@+id/btnPayWithCustomer"/>
 
 </RelativeLayout>
