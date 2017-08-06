@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         btnPay = (Button) findViewById(R.id.btnPay);
         btnPay.setVisibility(View.GONE);
         mContext = getApplicationContext();
-        stripe = new Stripe(mContext, "pk_test_ogTRhfvXntPKIP9BBHdqUGof");
+        stripe = new Stripe(mContext, "<STRIPE PUBLIC KEY>");
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
