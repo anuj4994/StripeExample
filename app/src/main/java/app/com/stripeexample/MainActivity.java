@@ -42,7 +42,7 @@ import cz.msebera.android.httpclient.entity.mime.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnGenerateToken, btnPay, btnSaveCustomer, btnPayWithCustomer;
+    Button btnGenerateToken, btnPay, btnSaveCustomer, btnPayWithCustomer, btnCreateConnectClient,btnPayWithConnect;
     EditText txtFirstName, txtLastName, txtAddressLine1, txtAddressLine2, txtCity, txtState, txtZip, txtEmail;
     CardInputWidget mCardInputWidget;
     Card cardToSave;
@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
         btnSaveCustomer.setVisibility(View.GONE);
         btnPayWithCustomer = (Button) findViewById(R.id.btnPayWithCustomer);
         btnPayWithCustomer.setVisibility(View.GONE);
+        btnCreateConnectClient = (Button) findViewById(R.id.btnCreateConnectClient);
+        btnPayWithConnect = (Button) findViewById(R.id.btnPayWithConnect);
 
         txtFirstName = (EditText) findViewById(R.id.txtFirstName);
         txtLastName = (EditText) findViewById(R.id.txtLastName);
@@ -192,6 +194,68 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnCreateConnectClient.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params  = new RequestParams();
+                params.put("email", txtEmail.getText().toString());
+                client.post("http://54.70.113.238:7002/createConnectAccount/",params ,new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+                        Toast.makeText(MainActivity.this,"Payment Successful ",Toast.LENGTH_LONG).show();
+                        try {
+                            //TODO Store this connect account object
+                            String connectAccount = new String(responseBody, "UTF-8");
+                            System.out.println(connectAccount);
+//                            btnPayWithCustomer.setVisibility(View.VISIBLE);
+
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+                        System.out.println(Arrays.toString(headers) + " :::: " + statusCode);
+                        Toast.makeText(MainActivity.this,"Payment Declined ",Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+
+        btnPayWithConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params  = new RequestParams();
+                params.put("account", "acct_1BPjfgEtS9fhKI6U");
+                params.put("amount", "1000");
+                params.put("source", mToken.getId());
+                client.post("http://54.70.113.238:7002/connectCharge/",params ,new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody) {
+                        Toast.makeText(MainActivity.this,"Payment Successful ",Toast.LENGTH_LONG).show();
+                        try {
+                            //TODO Store this connect account object
+                            String connectAccount = new String(responseBody, "UTF-8");
+                            System.out.println(connectAccount);
+//                            btnPayWithCustomer.setVisibility(View.VISIBLE);
+
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, cz.msebera.android.httpclient.Header[] headers, byte[] responseBody, Throwable error) {
+                        System.out.println(Arrays.toString(headers) + " :::: " + statusCode);
+                        Toast.makeText(MainActivity.this,"Payment Declined ",Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
+
 
     }
 
@@ -219,8 +283,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-
-    //http://54.70.113.238/stripe/charge.php
 
 
 }

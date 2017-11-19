@@ -109,4 +109,17 @@
         android:text="Pay with Saved Customer"
         android:id="@+id/btnPayWithCustomer"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnPayWithCustomer"
+        android:text="Register Connect client"
+        android:id="@+id/btnCreateConnectClient"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/btnCreateConnectClient"
+        android:text="Pay Connect client"
+        android:id="@+id/btnPayWithConnect"/>
+
 </RelativeLayout>
